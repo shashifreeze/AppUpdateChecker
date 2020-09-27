@@ -1,0 +1,3 @@
+include ':UpdateChecker'
+include ':app'
+rootProject.name = "AppUpdateChecker"
