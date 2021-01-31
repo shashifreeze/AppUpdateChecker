@@ -12,23 +12,24 @@ import androidx.appcompat.app.AlertDialog;
 
 import org.jsoup.Jsoup;
 
+import java.lang.ref.WeakReference;
+
 public class AppUpdateChecker {
 
-    private Activity activity;
-    private String currentVersionName;
+    private static WeakReference<Activity> activityWeakReference;
+    private static String currentVersionName;
 
-    public AppUpdateChecker(Activity activity,String currentVersionName) {
-        this.activity = activity;
-        this.currentVersionName = currentVersionName;
+    public AppUpdateChecker(Activity activity,String currentVersion) {
+        activityWeakReference = new WeakReference<>(activity);
+        currentVersionName = currentVersion;
     }
 
-    class GetLatestAppVersionFromPlayStore extends AsyncTask<String, String, String> {
+   static class GetLatestAppVersionFromPlayStore extends AsyncTask<String, String, String> {
         private String latestAppVersionFromPlayStore;
         private ProgressDialog progressDialog;
         private boolean manualCheck;
 
-
-        GetLatestAppVersionFromPlayStore(boolean manualCheck) {
+       private GetLatestAppVersionFromPlayStore(boolean manualCheck) {
             this.manualCheck = manualCheck;
         }
 
@@ -37,7 +38,7 @@ public class AppUpdateChecker {
             super.onPostExecute(s);
             if (manualCheck)
             {
-                if ((activity!=null)&&progressDialog!=null &&( !activity.isFinishing())&&(!activity.isDestroyed()))
+                if ((activityWeakReference.get()!=null)&&progressDialog!=null &&( !activityWeakReference.get().isFinishing())&&(!activityWeakReference.get().isDestroyed()))
                 {
                     if (progressDialog.isShowing())
                     {
@@ -51,14 +52,14 @@ public class AppUpdateChecker {
 
             //If the versions are not the same
             if(!installedAppVersion.equals(latestAppVersionFromPlayStore)&& latestAppVersionFromPlayStore !=null){
-                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(activityWeakReference.get());
                 builder.setTitle("An Update("+latestAppVersionFromPlayStore+") is Available on Play Store.");
                 builder.setMessage("Installed App Version:"+installedAppVersion+"\n\nStrongly recommend to update.");
                 builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Click button action
-                        activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+activity.getPackageName())));
+                        activityWeakReference.get().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+activityWeakReference.get().getPackageName())));
                         dialog.dismiss();
                     }
                 });
@@ -72,11 +73,11 @@ public class AppUpdateChecker {
 
                 builder.setCancelable(false);
                 // to avoid the bad token exception
-                if ((activity!=null)&&(!activity.isFinishing())&&(!activity.isDestroyed()))
+                if ((activityWeakReference.get()!=null)&&(!activityWeakReference.get().isFinishing())&&(!activityWeakReference.get().isDestroyed()))
                     builder.show();
             }else {
                 if (manualCheck) {
-                    Toast.makeText(activity, "No Update Available", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activityWeakReference.get(), "No Update Available", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -85,10 +86,10 @@ public class AppUpdateChecker {
         protected void onPreExecute() {
             super.onPreExecute();
             if (manualCheck) {
-                progressDialog=new ProgressDialog(activity);
+                progressDialog=new ProgressDialog(activityWeakReference.get());
                 progressDialog.setMessage("Checking For Update.....");
                 progressDialog.setCancelable(false);
-                if(!activity.isFinishing())
+                if(!activityWeakReference.get().isFinishing())
                     progressDialog.show();
             }
 
@@ -98,7 +99,7 @@ public class AppUpdateChecker {
         protected String doInBackground(String... params) {
             try {
                 //It retrieves the latest version by scraping the content of current version from play store at runtime
-                latestAppVersionFromPlayStore = Jsoup.connect("https://play.google.com/store/apps/details?id=" + activity.getPackageName() + "&hl=it")
+                latestAppVersionFromPlayStore = Jsoup.connect("https://play.google.com/store/apps/details?id=" + activityWeakReference.get().getPackageName() + "&hl=it")
                         .timeout(30000)
                         .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
                         .referrer("http://www.google.com")
