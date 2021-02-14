@@ -29,8 +29,8 @@ I. Checking update manually: When user performs any event(Click), library checks
 	   If no update available  on the play store ->  Then a toast will be shown as 'No update available'.
 	   For eg: User click a button to check for update, then call the method with argument true shown as below.
 	  
-	     // Create instance of class AppUpdateChecker
-       	     	AppUpdateChecker appUpdateChecker = new AppUpdateChecker(activity);
+	     // Create instance of class AppUpdateChecker .. Arg1 = activity, Arg2 = App current version name
+       	     	AppUpdateChecker appUpdateChecker = new AppUpdateChecker(activity,BuildConfig.VERSION_NAME);
 	     // Call for manual check
              	appUpdateChecker.checkForUpdate(true);
 Screenshots:	
@@ -42,8 +42,8 @@ II. Checking update on app startup : The library will check for update in the ba
 	If update availbale on play store-> Show popup with message 'An update [Current app version on play store] is available on the play store'.
 	If no update available  on the play store ->  Nothing happens.
 	 
-	     // Create instance of class AppUpdateChecker
-       	     	AppUpdateChecker appUpdateChecker = new AppUpdateChecker(activity);
+	     // Create instance of class AppUpdateChecker .. Arg1 = activity, Arg2 = App current version name
+       	     	AppUpdateChecker appUpdateChecker = new AppUpdateChecker(activity,BuildConfig.VERSION_NAME);
 	     // Call for automatic check
              	appUpdateChecker.checkForUpdate(false);
 Screenshots:
